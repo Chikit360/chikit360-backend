@@ -5,10 +5,13 @@ const { Schema } = mongoose;
 // Define the Customer Schema
 const customerSchema = new Schema(
   {
+     hospital:{
+        type: mongoose.Schema.ObjectId,
+        ref: "Hospital"
+      },
     email: {
       type: String,
       required: false, // Not required
-      unique: true, // Email should be unique if provided
       lowercase: true, // Convert email to lowercase
       trim: true, // Trim any whitespace
     },
@@ -20,7 +23,6 @@ const customerSchema = new Schema(
     mobile: {
       type: String,
       required: true, // Mobile is required
-      unique: true, // Ensure the mobile number is unique
       validate: {
         validator: function (v) {
           // Custom regex for validating mobile number format
@@ -68,6 +70,8 @@ customerSchema.pre('save', function(next) {
   }
   next();
 });
+
+customerSchema.index({ mobile: 1, hospital: 1 }, { unique: true });
 
 // Create and export the Customer model
 const Customer = mongoose.model('Customer', customerSchema);

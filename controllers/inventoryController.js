@@ -1,6 +1,7 @@
 const sendResponse = require("../utils/response.formatter");
 const Medicine = require("../models/medicineModel");
 const Inventory = require("../models/inventoryModel");
+const  mongoose = require("mongoose");
 
 // Add or Update Inventory
 
@@ -59,6 +60,7 @@ exports.addOrUpdateInventory = async (req, res) => {
         manufactureDate,
         minimumStockLevel,
         shelfLocation,
+        hospital: req.user.hospital,
       });
       return sendResponse(res, {
         status: 201,
@@ -79,6 +81,7 @@ exports.addOrUpdateInventory = async (req, res) => {
       manufactureDate: manufactureDate || existingInventoryItem.manufactureDate,
       minimumStockLevel: minimumStockLevel || existingInventoryItem.minimumStockLevel,
       shelfLocation: shelfLocation || existingInventoryItem.shelfLocation,
+      hospital: req.user.hospital,
     });
 
     return sendResponse(res, {
@@ -101,8 +104,26 @@ exports.addOrUpdateInventory = async (req, res) => {
 // Get All Inventory Details Grouped by Medicine with Expiry Dates
 exports.getAllInventoryDetails = async (req, res) => {
   try {
+
+    // Validate ObjectId
+        const hospitalId = mongoose.Types.ObjectId.isValid(req.user.hospital)
+          ? new mongoose.Types.ObjectId(req.user.hospital)
+          : null;
+    
+        if (!hospitalId) {
+          return sendResponse(res, {
+            status: 400,
+            message: "Invalid hospital ID",
+            data: [],
+          });
+        }
     const inventoryData = await Inventory.aggregate([
       // Join with Medicine collection
+      {
+        $match: {
+          hospital: hospitalId,
+        },
+      },
       {
         $lookup: {
           from: 'medicines',

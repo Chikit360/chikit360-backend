@@ -2,7 +2,7 @@ const Stock = require('../models/stockModel');
 const Medicine = require('../models/medicineModel');
 const Inventory = require('../models/inventoryModel');
 const sendResponse  = require('../utils/response.formatter');
-const { default: mongoose } = require('mongoose');
+const  mongoose = require('mongoose');
 const Customer = require('../models/customerModel');
 
 const stockController = {};
@@ -75,6 +75,7 @@ stockController.createSale = async (req, res) => {
     const invoiceId = `INV-${Date.now()}`;
     const newSale = await Stock.create([{
       invoiceId,
+      hospital:req.user.hospital,
       soldBy: user,
       items: saleItems,
       totalAmount,
@@ -83,7 +84,7 @@ stockController.createSale = async (req, res) => {
     console.log(newSale)
 
     // Find the customer by mobile
-    let customer = await Customer.findOne({ mobile: customerContact }).session(session);
+    let customer = await Customer.findOne({hospital:req.user.hospital, mobile: customerContact }).session(session);
 console.log("first",customer)
     if (customer) {
       // Update existing customer with new sale
@@ -96,6 +97,7 @@ console.log("first",customer)
       customer = new Customer({
         mobile: customerContact,
         name: customerName,
+        hospital:req.user.hospital,
         invoices: [newSale[0]],
       });
 
@@ -126,7 +128,25 @@ module.exports = stockController;
 // Get all sales with total amount per month
 stockController.getAllSales = async (req, res) => {
   try {
+     // Validate ObjectId
+        const hospitalId = mongoose.Types.ObjectId.isValid(req.user.hospital)
+          ? new mongoose.Types.ObjectId(req.user.hospital)
+          : null;
+
+           if (!hospitalId) {
+                return sendResponse(res, {
+                  status: 400,
+                  message: "Invalid hospital ID",
+                  data: [],
+                });
+              }
     const salesData = await Stock.aggregate([
+      {
+        
+        $match: {
+          hospital: hospitalId,
+        },
+      },
       {
         $group: {
           _id: {

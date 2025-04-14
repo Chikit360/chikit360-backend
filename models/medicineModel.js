@@ -6,6 +6,11 @@ const generateCustomId = require('../utils/generateSchemaID');
  * Defines the structure for storing medicine-related information in the database.
  */
 const medicineSchema = new mongoose.Schema({
+
+  hospital:{
+    type: mongoose.Schema.ObjectId,
+    ref: "Hospital"
+  },
   
   /**
    * Unique of the medicine.

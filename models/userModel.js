@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const generateCustomId = require('../utils/generateSchemaID');
 
 const userSchema = new mongoose.Schema({
+  hospital:{type:mongoose.Schema.ObjectId,ref:"Hospital"},
   username: {
     type: String,
     required: true,
@@ -19,7 +20,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['pharmacy_manager', 'pharmacist', 'cashier', 'pharmacy_staff', 'customer'],
+    enum: ["superAdmin","admin",'pharmacy_manager', 'pharmacist', 'cashier', 'pharmacy_staff', 'customer'],
     required: true,
   },
   created_at: {

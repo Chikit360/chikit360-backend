@@ -14,10 +14,10 @@ const dashboardAnalytics = async (req, res) => {
 
     // Total counts
     const [totalMedicines, totalInventory, totalCustomers, totalTodaySales] = await Promise.all([
-      Medicine.countDocuments(),
-      Inventory.countDocuments(),
-      Customer.countDocuments(),
-      Stock.countDocuments({ createdAt: { $gte: startOfDay, $lte: endOfDay } }),
+      Medicine.countDocuments({hospital:req.user.hospital}),
+      Inventory.countDocuments({hospital:req.user.hospital}),
+      Customer.countDocuments({hospital:req.user.hospital}),
+      Stock.countDocuments({ hospital:req.user.hospital,createdAt: { $gte: startOfDay, $lte: endOfDay } }),
     ]);
 
     const todaySales = await Stock.find({ createdAt: { $gte: startOfDay, $lte: endOfDay } });

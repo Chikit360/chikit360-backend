@@ -22,8 +22,8 @@ const verifyToken = async(req, res, next) => {
       user: userId, // 'sub' is standard for subject (userId)
       blacklisted: false,
       token: token
-    }).populate('user', 'username email role'); // Populate userId with name, email, and role
-    console.log(tokenInDB)
+    }).populate('user', 'username email role hospital'); // Populate userId with name, email, and role
+    // console.log("from auth middleware: ",tokenInDB.user)
     if (!tokenInDB) {
       return res.status(401).json({ message: 'Token expired or invalid. Please login again.' });
     }

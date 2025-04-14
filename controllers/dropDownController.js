@@ -6,7 +6,7 @@ const getDropdownOptions = async (req, res) => {
   try {
     console.log(req.query);
     const { inputFieldName } = req.query;
-    const options = await DropdownOption.find({ inputFieldName });
+    const options = await DropdownOption.find({ inputFieldName,hospital:req.user.hospital });
     
     return sendResponse(res, { data: options, message: 'Dropdown options fetched successfully', status: 200 });
   } catch (error) {
@@ -19,7 +19,7 @@ const getDropdownOptions = async (req, res) => {
 const addDropdownOption = async (req, res) => {
   try {
     console.log(req.body);
-    const newOption = new DropdownOption(req.body);
+    const newOption = new DropdownOption({...req.body,hospital:req.user.hospital});
     await newOption.save();
     return sendResponse(res, { data: newOption, message: "Option added successfully", status: 201 });
   } catch (error) {

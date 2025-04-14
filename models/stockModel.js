@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 const generateCustomId = require('../utils/generateSchemaID');
 
 const stockSchema = new mongoose.Schema({
+  hospital:{
+    type: mongoose.Schema.ObjectId,
+    ref: "Hospital"
+  },
   invoiceId: {
     type: String,
     required: true,

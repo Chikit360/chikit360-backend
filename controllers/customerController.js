@@ -6,7 +6,7 @@ const sendResponse = require('../utils/response.formatter');
 // Get all customers and their corresponding invoice details
 const getAllCustomers = async (req, res) => {
   try {
-    const customers = await Customer.find()
+    const customers = await Customer.find({hospital:req.user.hospital})
       .populate('invoices') // Populate the invoices with the full Stock details
       .exec(); // Execute the query
 

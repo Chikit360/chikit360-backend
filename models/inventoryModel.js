@@ -6,6 +6,11 @@ const generateCustomId = require('../utils/generateSchemaID');
  * Defines the structure for storing inventory-related information in the database.
  */
 const inventorySchema = new mongoose.Schema({
+
+   hospital:{
+        type: mongoose.Schema.ObjectId,
+        ref: "Hospital"
+      },
   /**
    * Reference to the associated medicine.
    * Required: Yes

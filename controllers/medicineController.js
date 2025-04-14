@@ -1,6 +1,7 @@
 const sendResponse = require('../utils/response.formatter');
 const Medicine = require('../models/medicineModel');
 const Inventory = require('../models/inventoryModel');
+const  mongoose = require('mongoose');
 
 const medicineController = {};
 
@@ -11,7 +12,7 @@ medicineController.createMedicine = async (req, res) => {
         session.startTransaction();
 
         console.log('Request Body:', req.body);
-        const reqBody = { ...req.body, medicineCode: `MED${Math.floor(10000 + Math.random() * 90000)}` }
+        const reqBody = { ...req.body,hospital:req.user.hospital, medicineCode: `MED${Math.floor(10000 + Math.random() * 90000)}` }
 
         // Create Medicine using Transaction
         const newMedicine = await Medicine.create([reqBody], { session });
@@ -35,59 +36,77 @@ medicineController.createMedicine = async (req, res) => {
     }
 };
 
-// Read all medicines with their inventory details
 medicineController.getAllMedicines = async (req, res) => {
-    try {
-        console.log("Fetching all medicines...");
+  try {
+    console.log("Fetching all medicines for hospital:", req.user.hospital);
 
-        const medicinesWithInventory = await Medicine.aggregate([
-            {
-                $lookup: {
-                    from: "inventories",
-                    localField: "_id",
-                    foreignField: "medicineId",
-                    as: "inventoryDetails",
-                },
-            },
-            {
-                $addFields: {
-                    totalQuantity: {
-                        $sum: "$inventoryDetails.quantityInStock",
-                    },
-                    batchNumber: {
-                        $first: "$inventoryDetails.batchNumber",
-                    },
-                },
-            },
-            {
-                $project: {
-                    inventoryDetails: 0, // Exclude inventory details after processing
-                },
-            },
-        ]);
+    // Validate ObjectId
+    const hospitalId = mongoose.Types.ObjectId.isValid(req.user.hospital)
+      ? new mongoose.Types.ObjectId(req.user.hospital)
+      : null;
 
-        if (!medicinesWithInventory || medicinesWithInventory.length === 0) {
-            return sendResponse(res, {
-                data: [],
-                status: 200,
-                message: "No medicines found"
-            });
-        }
-
-        return sendResponse(res, {
-            data: medicinesWithInventory,
-            status: 200,
-            message: "Medicines retrieved successfully"
-        });
-    } catch (error) {
-        console.error("Error fetching medicines:", error);
-        return sendResponse(res, {
-            message: 'Internal server error',
-            error: true,
-            status: 500
-        });
+    if (!hospitalId) {
+      return sendResponse(res, {
+        status: 400,
+        message: "Invalid hospital ID",
+        data: [],
+      });
     }
+
+    const medicinesWithInventory = await Medicine.aggregate([
+      {
+        $match: {
+          hospital: hospitalId,
+        },
+      },
+      {
+        $lookup: {
+          from: "inventories",
+          localField: "_id",
+          foreignField: "medicineId",
+          as: "inventoryDetails",
+        },
+      },
+      {
+        $addFields: {
+          totalQuantity: {
+            $sum: "$inventoryDetails.quantityInStock",
+          },
+          batchNumber: {
+            $first: "$inventoryDetails.batchNumber",
+          },
+        },
+      },
+      {
+        $project: {
+          inventoryDetails: 0,
+        },
+      },
+    ]);
+
+    if (!medicinesWithInventory || medicinesWithInventory.length === 0) {
+      return sendResponse(res, {
+        data: [],
+        status: 200,
+        message: "No medicines found",
+      });
+    }
+
+    return sendResponse(res, {
+      data: medicinesWithInventory,
+      status: 200,
+      message: "Medicines retrieved successfully",
+    });
+  } catch (error) {
+    console.error("Error fetching medicines:", error);
+    return sendResponse(res, {
+      message: "Internal server error",
+      error: true,
+      status: 500,
+    });
+  }
 };
+
 
 // Read medicine by ID with inventory details
 medicineController.getMedicineById = async (req, res) => {
@@ -422,8 +441,26 @@ medicineController.getAvailableMedicines = async (req, res) => {
       // Calculate skip value for pagination
       const skip = (parseInt(page) - 1) * parseInt(limit);
 
+      // Validate ObjectId
+    const hospitalId = mongoose.Types.ObjectId.isValid(req.user.hospital)
+    ? new mongoose.Types.ObjectId(req.user.hospital)
+    : null;
+
+  if (!hospitalId) {
+    return sendResponse(res, {
+      status: 400,
+      message: "Invalid hospital ID",
+      data: [],
+    });
+  }
+
       // Perform aggregation to fetch medicines with available stock and MRP
       const medicines = await Medicine.aggregate([
+        {
+            $match: {
+              hospital: hospitalId,
+            },
+          },
           {
               $lookup: {
                   from: 'inventories',

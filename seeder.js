@@ -22,7 +22,7 @@ const seedFirstUser = async () => {
             username: 'admin',
             email: 'admin@example.com',
             password: 'adminPassword', // Plain text password (will be hashed by pre-save middleware)
-            role: 'pharmacy_manager'
+            role: 'superAdmin'
         });
 
         // Save the first user

@@ -16,6 +16,8 @@ const inventoryRouter = require('./routes/inventory.router');
 const customerRouter = require('./routes/customerRouter');
 const dropDownRouter = require('./routes/dropDownRoute');
 const dashboardRouter = require('./routes/dashboardRouter');
+const notificationRouter = require('./routes/notificationRouter');
+const hospitalRouter = require('./routes/hospital.router');
 const authMiddleware = require('./middlewares/authMiddleware');
 const errorMiddleware = require('./middlewares/errorMiddleware');
 const { runLowStockCheck, expiringSoonAlert, runExpiryCheck } = require('./services/inventoryService');
@@ -42,7 +44,11 @@ app.use(session({
   saveUninitialized: false,
 }));
 
-// cron jobs 
+// cloudinary.config({ 
+//   cloud_name: 'dibrrvvih', 
+//   api_key: '956683266391358', 
+//   api_secret: '1mjv3W8avGYXhggEnTNfNA_vuyc'
+// });
 
 
 
@@ -52,6 +58,8 @@ cron.schedule('0 6,12,20 * * *', () => {
   runLowStockCheck();
   runExpiryCheck();
 });
+
+
 
 
 
@@ -88,10 +96,12 @@ app.use('/medicines', authMiddleware.verifyToken, medicineRouter);
 app.use('/sales', authMiddleware.verifyToken, stockRouter);
 
 // app.use('/inventories', authMiddleware.verifyToken, inventoryRouter);
-app.use('/inventories', inventoryRouter);
-app.use('/customers', customerRouter);
-app.use('/dropdowns', dropDownRouter);
-app.use('/dashboard', dashboardRouter);
+app.use('/inventories',authMiddleware.verifyToken, inventoryRouter);
+app.use('/customers',authMiddleware.verifyToken, customerRouter);
+app.use('/dropdowns',authMiddleware.verifyToken, dropDownRouter);
+app.use('/dashboard',authMiddleware.verifyToken, dashboardRouter);
+app.use('/notifications',authMiddleware.verifyToken, notificationRouter);
+app.use('/hospitals',authMiddleware.verifyToken, hospitalRouter);
 
 // Error handling middleware
 app.use(errorMiddleware);
