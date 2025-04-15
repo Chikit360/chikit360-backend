@@ -1,4 +1,5 @@
 const hospitalModel = require('../models/hospitalModel');
+const notificationSettingModel = require('../models/notificationSettingModel');
 const User = require('../models/userModel');
 const sendEmail = require('../services/mailService');
 const sendResponse = require('../utils/response.formatter');

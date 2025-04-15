@@ -19,6 +19,7 @@ const dashboardRouter = require('./routes/dashboardRouter');
 const notificationRouter = require('./routes/notificationRouter');
 const hospitalRouter = require('./routes/hospital.router');
 const notificationSettingdRouter = require('./routes/notificationSettingRouter');
+const superAdminRouter = require('./routes/superAdminDashboardRouter');
 const authMiddleware = require('./middlewares/authMiddleware');
 const errorMiddleware = require('./middlewares/errorMiddleware');
 const { runLowStockCheck, runExpiryCheck } = require('./services/inventoryService');
@@ -60,8 +61,7 @@ cron.schedule('0 6,12,20 * * *', () => {
   runExpiryCheck();
 });
 
-runLowStockCheck();
-runExpiryCheck();
+
 
 
 
@@ -90,7 +90,7 @@ mongoose.connect(MONGO_URI,)
   .catch(err => console.log('MongoDB connection error:', err));
 
 // Mount the user router on /users path
-app.use('/users', userRouter);
+app.use('/users',  userRouter);
 
 // Mount the medicine router on /medicines path
 app.use('/medicines', authMiddleware.verifyToken, medicineRouter);
@@ -106,6 +106,7 @@ app.use('/dashboard',authMiddleware.verifyToken, dashboardRouter);
 app.use('/notifications',authMiddleware.verifyToken, notificationRouter);
 app.use('/hospitals',authMiddleware.verifyToken, hospitalRouter);
 app.use('/notification-settings',authMiddleware.verifyToken, notificationSettingdRouter);
+app.use('/super-admin',authMiddleware.verifyToken, superAdminRouter);
 
 // Error handling middleware
 app.use(errorMiddleware);
