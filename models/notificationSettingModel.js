@@ -15,6 +15,14 @@ const notificationSettingSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  email: {
+    type: String,
+    default: null,
+  },
+  password: {
+    type: String,
+    default: null,
+  },
   inAppNotifications: {
     type: Boolean,
     default: true,
