@@ -16,9 +16,10 @@ const inventoryRouter = require('./routes/inventory.router');
 const customerRouter = require('./routes/customerRouter');
 const dropDownRouter = require('./routes/dropDownRoute');
 const dashboardRouter = require('./routes/dashboardRouter');
+const notificationSettingdRouter = require('./routes/notificationSettingRouter');
 const authMiddleware = require('./middlewares/authMiddleware');
 const errorMiddleware = require('./middlewares/errorMiddleware');
-const { runLowStockCheck, expiringSoonAlert, runExpiryCheck } = require('./services/inventoryService');
+const { runLowStockCheck, runExpiryCheck } = require('./services/inventoryService');
 
 const app = express();
 
@@ -92,6 +93,7 @@ app.use('/inventories', inventoryRouter);
 app.use('/customers', customerRouter);
 app.use('/dropdowns', dropDownRouter);
 app.use('/dashboard', dashboardRouter);
+app.use('/notification-settings',authMiddleware.verifyToken, notificationSettingdRouter);
 
 // Error handling middleware
 app.use(errorMiddleware);
