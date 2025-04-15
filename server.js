@@ -18,9 +18,10 @@ const dropDownRouter = require('./routes/dropDownRoute');
 const dashboardRouter = require('./routes/dashboardRouter');
 const notificationRouter = require('./routes/notificationRouter');
 const hospitalRouter = require('./routes/hospital.router');
+const notificationSettingdRouter = require('./routes/notificationSettingRouter');
 const authMiddleware = require('./middlewares/authMiddleware');
 const errorMiddleware = require('./middlewares/errorMiddleware');
-const { runLowStockCheck, expiringSoonAlert, runExpiryCheck } = require('./services/inventoryService');
+const { runLowStockCheck, runExpiryCheck } = require('./services/inventoryService');
 
 const app = express();
 
@@ -102,6 +103,7 @@ app.use('/dropdowns',authMiddleware.verifyToken, dropDownRouter);
 app.use('/dashboard',authMiddleware.verifyToken, dashboardRouter);
 app.use('/notifications',authMiddleware.verifyToken, notificationRouter);
 app.use('/hospitals',authMiddleware.verifyToken, hospitalRouter);
+app.use('/notification-settings',authMiddleware.verifyToken, notificationSettingdRouter);
 
 // Error handling middleware
 app.use(errorMiddleware);
