@@ -89,6 +89,14 @@ exports.createHospital = async (req, res) => {
        password:randomPass,
        hospital:hospital._id,
      })
+    //  notification setting create 
+
+    await notificationSettingModel.create({
+      hospital: hospital._id,
+      emailNotifications: false,
+      inAppNotifications: true,
+    });
+
     // send an email to organization with full in
     console.log(hospital)
     const html = template

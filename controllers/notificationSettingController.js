@@ -4,7 +4,7 @@ const sendResponse = require("../utils/response.formatter");
 
 const getNotificationSettings = async (req, res) => {
   try {
-    const setting = await notificationSettingModel.findOne({user: req.user._id});
+    const setting = await notificationSettingModel.findOne({hospital: req.user.hospital});
 
     if (!setting) {
       return sendResponse(res, {
@@ -33,7 +33,7 @@ const updateNotificationSettings = async (req, res) => {
 
     console.log(req.body)
     const updated = await notificationSettingModel.findOneAndUpdate(
-      { user: req.user._id },
+      { hospital: req.user.hospital },
       { ...req.body},
       { new: true }
     );

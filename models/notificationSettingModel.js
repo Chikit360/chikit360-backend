@@ -1,15 +1,10 @@
 const mongoose = require('mongoose');
 
 const notificationSettingSchema = new mongoose.Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    // required: true, // required if user isn't set
-  },
   hospital: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Hospital',
-    // required: true, // required if user isn't set
+    required: true, // required if user isn't set
   },
   emailNotifications: {
     type: Boolean,
