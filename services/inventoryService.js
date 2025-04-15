@@ -4,6 +4,7 @@ const sendEmail = require('./mailService');
 const User = require('../models/userModel');
 const notificationModel = require('../models/notificationModel');
 const hospitalModel = require('../models/hospitalModel');
+const notificationSettingModel = require('../models/notificationSettingModel');
 
 // HTML Templates
 const lowStockAlertTemp = `...`; // as provided above
@@ -72,15 +73,26 @@ const lowStockAlert = async () => {
       </html>
       `;
 
-      await sendEmail(adminEmail, `🚨 Low Stock Alert - ${hospital.name}`, html);
+      const notificationSetting=await notificationSettingModel.findOne({ hospital: hospitalId })
+        console.log(notificationSetting)
+      if(notificationSetting){
+        if(notificationSetting.emailNotifications){
+          await sendEmail(notificationSetting.email, `🚨 Low Stock Alert - ${hospital.name}`, html);
+        }
+        if(notificationSetting.inAppNotifications){
+          await notificationModel.create({
+            hospital: hospital._id,
+            title: "Low Stock Alert",
+            message: `Found ${items.length} low stock items. Check your email.`
+          });
+        }
+        
+      console.log(`Sent alert to ${notificationSetting.email} for ${hospital.name}`);
+      }
+      
 
-      await notificationModel.create({
-        hospital: hospital._id,
-        title: "Low Stock Alert",
-        message: `Found ${items.length} low stock items. Check your email.`
-      });
+     
 
-      console.log(`Sent alert to ${adminEmail} for ${hospital.name}`);
     }
 
   } catch (error) {
@@ -158,15 +170,22 @@ const expiringSoonAlert = async () => {
       </html>
       `;
 
-      await sendEmail(adminEmail, `⚠️ Expiring Soon - ${hospital.name}`, html);
+      const notificationSetting=await notificationSettingModel.findOne({ hospital: hospitalId })
+      if(notificationSetting){
+        if(notificationSetting.emailNotifications){
+          await sendEmail(notificationSetting.email, `⚠️ Expiring Soon Alert - ${hospital.name}`, html);
+        }
+        if(notificationSetting.inAppNotifications){
+          await notificationModel.create({
+            hospital: hospital._id,
+            title: "Expiring Soon Alert",
+            message: `Found ${items.length} expiring items. Check your email.`
+          });
+        }
+        console.log(`Sent expiring alert to ${notificationSetting.email} for ${hospital.name}`);
+      }
+      
 
-      await notificationModel.create({
-        hospital: hospital._id,
-        title: "Expiring Soon Alert",
-        message: `Found ${items.length} expiring items. Check your email.`
-      });
-
-      console.log(`Sent expiring alert to ${adminEmail} for ${hospital.name}`);
     }
 
   } catch (error) {
@@ -179,7 +198,7 @@ const runLowStockCheck = async () => {
   try {
     const alerts = await lowStockAlert();
     
-    console.log(alerts)
+   
   } catch (err) {
     console.error('Error during low stock cron job:', err);
   }
@@ -189,7 +208,7 @@ const runExpiryCheck = async () => {
   console.log(`[${new Date().toLocaleString()}] Running expiry check...`);
   try {
     const alerts = await expiringSoonAlert();
-    console.log(alerts)
+    
   } catch (err) {
     console.error('Error during expiry cron job:', err);
   }

@@ -60,6 +60,8 @@ cron.schedule('0 6,12,20 * * *', () => {
   runExpiryCheck();
 });
 
+runLowStockCheck();
+runExpiryCheck();
 
 
 

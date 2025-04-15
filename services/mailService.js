@@ -6,10 +6,10 @@ const sendEmail = async (to, subject, html) => {
       host: 'smtp.ethereal.email',
       port: 587,
       auth: {
-          user: 'jeromy.hettinger16@ethereal.email',
-          pass: 'cBJAVXnXWMdaxQzU8s'
+          user: 'vella.frami@ethereal.email',
+          pass: 'DBYv2zHPaF92G2zgQB'
       }
-    });
+  });
     
 
     const mailOptions = {
