@@ -19,10 +19,13 @@ const dashboardRouter = require('./routes/dashboardRouter');
 const notificationRouter = require('./routes/notificationRouter');
 const hospitalRouter = require('./routes/hospital.router');
 const notificationSettingdRouter = require('./routes/notificationSettingRouter');
+const subscriptionRouter = require('./routes/subscriptionRouter');
 const superAdminRouter = require('./routes/superAdminDashboardRouter');
+const paymentRouter = require('./routes/paymentRouter');
 const authMiddleware = require('./middlewares/authMiddleware');
 const errorMiddleware = require('./middlewares/errorMiddleware');
 const { runLowStockCheck, runExpiryCheck } = require('./services/inventoryService');
+const checkActiveSubscription = require('./middlewares/subscriptionMiddleware');
 
 const app = express();
 
@@ -93,20 +96,27 @@ mongoose.connect(MONGO_URI,)
 app.use('/users',  userRouter);
 
 // Mount the medicine router on /medicines path
-app.use('/medicines', authMiddleware.verifyToken, medicineRouter);
+app.use('/medicines', authMiddleware.verifyToken,checkActiveSubscription, medicineRouter);
 
 
-app.use('/sales', authMiddleware.verifyToken, stockRouter);
+app.use('/sales', authMiddleware.verifyToken,checkActiveSubscription, stockRouter);
 
 // app.use('/inventories', authMiddleware.verifyToken, inventoryRouter);
-app.use('/inventories',authMiddleware.verifyToken, inventoryRouter);
-app.use('/customers',authMiddleware.verifyToken, customerRouter);
-app.use('/dropdowns',authMiddleware.verifyToken, dropDownRouter);
-app.use('/dashboard',authMiddleware.verifyToken, dashboardRouter);
-app.use('/notifications',authMiddleware.verifyToken, notificationRouter);
-app.use('/hospitals',authMiddleware.verifyToken, hospitalRouter);
-app.use('/notification-settings',authMiddleware.verifyToken, notificationSettingdRouter);
+app.use('/inventories',authMiddleware.verifyToken,checkActiveSubscription, inventoryRouter);
+app.use('/customers',authMiddleware.verifyToken,checkActiveSubscription, customerRouter);
+app.use('/dropdowns',authMiddleware.verifyToken,checkActiveSubscription, dropDownRouter);
+app.use('/dashboard',authMiddleware.verifyToken,checkActiveSubscription, dashboardRouter);
+app.use('/notifications',authMiddleware.verifyToken,checkActiveSubscription, notificationRouter);
+app.use('/hospitals',authMiddleware.verifyToken,checkActiveSubscription, hospitalRouter);
+app.use('/notification-settings',authMiddleware.verifyToken, checkActiveSubscription,notificationSettingdRouter);
+app.use('/subscription',authMiddleware.verifyToken,subscriptionRouter);
+
+
+
+// super admin
 app.use('/super-admin',authMiddleware.verifyToken, superAdminRouter);
+
+app.use('/payment', paymentRouter);
 
 // Error handling middleware
 app.use(errorMiddleware);
