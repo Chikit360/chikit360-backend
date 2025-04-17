@@ -6,6 +6,7 @@ const sendResponse = require('../utils/response.formatter');
 const generateSubscriptionToken = require('../utility/subscriptionToken');
 const Subscription = require('../models/subscriptionModel');
 const mongoose = require('mongoose');
+const offerPlanModel = require('../models/offerPlanModel');
 
 
 const template=`<!DOCTYPE html>
@@ -63,7 +64,7 @@ const template=`<!DOCTYPE html>
                   <h3 style="margin:0 0 10px;color:#4CAF50;">Login Credentials</h3>
                   <p style="margin:0;color:#333;"><strong>Email:</strong> {{email}}</p>
                   <p style="margin:0;color:#333;"><strong>Password:</strong> {{password}}</p>
-                  <p style="margin:0;color:#333;"><strong>license key:</strong> {{token}}</p>
+                 
                 </div>
 
                 <p style="text-align:center;font-size:13px;color:#888;margin-top:40px;">© {{year}} ThunderGits. All rights reserved.</p>
@@ -116,18 +117,30 @@ exports.createHospital = async (req, res) => {
 
     // 4. Create subscription
     const subscriptionToken = generateSubscriptionToken(hospital._id);
+    const defaultPlan=await offerPlanModel.findOne({name:'free_trial'});
+    
+    console.log(defaultPlan)
+    if (!defaultPlan) {
+      await session.abortTransaction();
+      return sendResponse(res, { status: 400, message: 'Default plan not found' });
+    }
+
+    // Fix date calculation
+const startDate = new Date();
+const endDate = new Date(startDate);
+endDate.setDate(endDate.getDate() + defaultPlan.validityInDays);
     await Subscription.create(
       [{
         hospital: hospital._id,
-        plan: 'basic',
-        price: 0,
+        offerPlanId: defaultPlan._id,
+        plan: defaultPlan.name,
+        price: defaultPlan.price,
         startDate: new Date(),
-        endDate: new Date(new Date().setDate(new Date()+7)),
+        endDate: endDate,
         isActive: true,
         isCancelled: false,
         paymentMethod: 'wallet',
         transactionId: 'xxxxxxxxxxxxxx',
-        subscriptionToken,
       }],
       { session }
     );
@@ -142,7 +155,6 @@ exports.createHospital = async (req, res) => {
       .replace('{{accreditations}}', hospital.accreditation.join(', '))
       .replace('{{email}}', user.email)
       .replace('{{password}}', randomPass)
-      .replace('{{token}}', subscriptionToken)
       .replace('{{year}}', new Date().getFullYear())
       .replace('{{address}}', `${hospital.address.street}, ${hospital.address.city}, ${hospital.address.state} - ${hospital.address.zipCode}, ${hospital.address.country}`);
 
@@ -161,13 +173,13 @@ exports.createHospital = async (req, res) => {
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
-    console.error('Hospital creation error:', err.message);
+    console.error('Hospital creation error:', err);
 
     return sendResponse(res, {
       error: true,
       status: 400,
       message: 'Error creating hospital',
-      data: err.message,
+      data: err,
     });
   }
 };

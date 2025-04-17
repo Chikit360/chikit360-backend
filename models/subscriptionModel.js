@@ -21,9 +21,13 @@ const SubscriptionSchema = new mongoose.Schema(
       ref: 'Hospital',
       required: true,
     },
-    plan: {
+    offerPlanId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'OfferPlan',
+      required: true,
+    },
+    plan:{
       type: String,
-      enum: ['basic', 'standard', 'premium'],
       required: true,
     },
     price: {
@@ -47,6 +51,10 @@ const SubscriptionSchema = new mongoose.Schema(
       default: false,
     },
     subscriptionToken: {
+      type: String,
+      default: null,
+    },
+    razorpayOrderId: {
       type: String,
       default: null,
     },

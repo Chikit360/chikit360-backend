@@ -107,7 +107,6 @@ app.use('/customers',authMiddleware.verifyToken,checkActiveSubscription, custome
 app.use('/dropdowns',authMiddleware.verifyToken,checkActiveSubscription, dropDownRouter);
 app.use('/dashboard',authMiddleware.verifyToken,checkActiveSubscription, dashboardRouter);
 app.use('/notifications',authMiddleware.verifyToken,checkActiveSubscription, notificationRouter);
-app.use('/hospitals',authMiddleware.verifyToken,checkActiveSubscription, hospitalRouter);
 app.use('/notification-settings',authMiddleware.verifyToken, checkActiveSubscription,notificationSettingdRouter);
 app.use('/subscription',authMiddleware.verifyToken,subscriptionRouter);
 
@@ -115,8 +114,9 @@ app.use('/subscription',authMiddleware.verifyToken,subscriptionRouter);
 
 // super admin
 app.use('/super-admin',authMiddleware.verifyToken, superAdminRouter);
+app.use('/hospitals',authMiddleware.verifyToken, hospitalRouter);
 
-app.use('/payment', paymentRouter);
+app.use('/payment', authMiddleware.verifyToken,paymentRouter);
 
 // Error handling middleware
 app.use(errorMiddleware);

@@ -6,7 +6,7 @@ const sendResponse = require("../utils/response.formatter");
 exports.getCurrSubscriptions = async (req, res) => {
   try {
     console.log("subscription: ",req.user.hospital)
-    const subscriptions = await Subscription.findOne({hospital:req.user.hospital}).populate('hospital');
+    const subscriptions = await Subscription.findOne({hospital:req.user.hospital}).populate('hospital offerPlanId');
     sendResponse(res, { data: subscriptions, status: 200, message: 'Fetched curr subscriptions' });
   } catch (error) {
     sendResponse(res, { status: 500, message: 'Failed to fetch subscriptions', data: error.message, error: true });
