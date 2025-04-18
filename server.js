@@ -21,6 +21,7 @@ const hospitalRouter = require('./routes/hospital.router');
 const notificationSettingdRouter = require('./routes/notificationSettingRouter');
 const subscriptionRouter = require('./routes/subscriptionRouter');
 const superAdminRouter = require('./routes/superAdminDashboardRouter');
+const offerPlanRouter = require('./routes/offerPlanRouter');
 const paymentRouter = require('./routes/paymentRouter');
 const authMiddleware = require('./middlewares/authMiddleware');
 const errorMiddleware = require('./middlewares/errorMiddleware');
@@ -117,6 +118,9 @@ app.use('/super-admin',authMiddleware.verifyToken, superAdminRouter);
 app.use('/hospitals',authMiddleware.verifyToken, hospitalRouter);
 
 app.use('/payment', authMiddleware.verifyToken,paymentRouter);
+
+// open api 
+app.use('/offers-plan',offerPlanRouter);
 
 // Error handling middleware
 app.use(errorMiddleware);

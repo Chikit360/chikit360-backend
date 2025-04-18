@@ -27,6 +27,9 @@ const planSchema = new mongoose.Schema(
     description: {
       type: String,
     },
+    color: {
+      type: String,
+    },
     features: [featureSchema], // All the features enabled/disabled in this plan
 
     limits: {
