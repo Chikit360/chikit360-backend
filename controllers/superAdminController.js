@@ -1,4 +1,5 @@
 const Customer = require("../models/customerModel");
+const hospitalModel = require("../models/hospitalModel");
 const Inventory = require("../models/inventoryModel");
 const Medicine = require("../models/medicineModel");
 const Stock = require("../models/stockModel");
@@ -13,9 +14,9 @@ const superAdminDashboardAnalytics = async (req, res) => {
     const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
     // Total counts
-    const [totalMedicines, totalInventory, totalCustomers, totalTodaySales] = await Promise.all([
+    const [totalMedicines, totalHospital, totalCustomers, totalTodaySales] = await Promise.all([
       Medicine.countDocuments(),
-      Inventory.countDocuments(),
+      hospitalModel.countDocuments(),
       Customer.countDocuments(),
       Stock.countDocuments({ createdAt: { $gte: startOfDay, $lte: endOfDay } }),
     ]);
@@ -85,7 +86,7 @@ const superAdminDashboardAnalytics = async (req, res) => {
       message: "Customer purchase history fetched successfully",
       data: {
         totalMedicines,
-        totalInventory,
+        totalHospital,
         totalCustomers,
         totalTodaySales,
         totalProfitToday,

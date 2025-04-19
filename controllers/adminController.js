@@ -6,7 +6,8 @@ const sendResponse = require("../utils/response.formatter");
 
 const dashboardAnalytics = async (req, res) => {
   try {
-    const { range = "daily" } = req.query;
+    const { range = "daily",hospitalId } = req.query;
+    
 
     const today = new Date();
     const startOfDay = new Date(today.setHours(0, 0, 0, 0));
@@ -14,10 +15,10 @@ const dashboardAnalytics = async (req, res) => {
 
     // Total counts
     const [totalMedicines, totalInventory, totalCustomers, totalTodaySales] = await Promise.all([
-      Medicine.countDocuments({hospital:req.user.hospital}),
-      Inventory.countDocuments({hospital:req.user.hospital}),
-      Customer.countDocuments({hospital:req.user.hospital}),
-      Stock.countDocuments({ hospital:req.user.hospital,createdAt: { $gte: startOfDay, $lte: endOfDay } }),
+      Medicine.countDocuments({hospital:hospitalId}),
+      Inventory.countDocuments({hospital:hospitalId}),
+      Customer.countDocuments({hospital:hospitalId}),
+      Stock.countDocuments({ hospital:hospitalId,createdAt: { $gte: startOfDay, $lte: endOfDay } }),
     ]);
 
     const todaySales = await Stock.find({ createdAt: { $gte: startOfDay, $lte: endOfDay } });
