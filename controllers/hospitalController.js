@@ -188,7 +188,7 @@ endDate.setDate(endDate.getDate() + defaultPlan.validityInDays);
 // Get all hospitals
 exports.getAllHospitals = async (req, res) => {
   try {
-    const hospitals = await hospitalModel.find();
+    const hospitals = await hospitalModel.find().sort({ createdAt: -1 });
     sendResponse(res, { data: hospitals, status: 200, message: 'Hospitals fetched successfully' });
   } catch (err) {
     sendResponse(res, { error: true, status: 400, message: 'Error fetching hospitals', data: err.message });

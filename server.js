@@ -106,11 +106,12 @@ app.use('/sales', authMiddleware.verifyToken,checkActiveSubscription, stockRoute
 app.use('/inventories',authMiddleware.verifyToken,checkActiveSubscription, inventoryRouter);
 app.use('/customers',authMiddleware.verifyToken,checkActiveSubscription, customerRouter);
 app.use('/dropdowns',authMiddleware.verifyToken,checkActiveSubscription, dropDownRouter);
-app.use('/dashboard',authMiddleware.verifyToken,checkActiveSubscription, dashboardRouter);
 app.use('/notifications',authMiddleware.verifyToken,checkActiveSubscription, notificationRouter);
 app.use('/notification-settings',authMiddleware.verifyToken, checkActiveSubscription,notificationSettingdRouter);
 app.use('/subscription',authMiddleware.verifyToken,subscriptionRouter);
 
+// admin
+app.use('/dashboard',authMiddleware.verifyToken, dashboardRouter);
 
 
 // super admin
