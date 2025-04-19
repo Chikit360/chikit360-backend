@@ -3,6 +3,10 @@ const notificationSettingModel = require('../models/notificationSettingModel');
 const User = require('../models/userModel');
 const sendEmail = require('../services/mailService');
 const sendResponse = require('../utils/response.formatter');
+const generateSubscriptionToken = require('../utility/subscriptionToken');
+const Subscription = require('../models/subscriptionModel');
+const mongoose = require('mongoose');
+const offerPlanModel = require('../models/offerPlanModel');
 
 
 const template=`<!DOCTYPE html>
@@ -60,6 +64,7 @@ const template=`<!DOCTYPE html>
                   <h3 style="margin:0 0 10px;color:#4CAF50;">Login Credentials</h3>
                   <p style="margin:0;color:#333;"><strong>Email:</strong> {{email}}</p>
                   <p style="margin:0;color:#333;"><strong>Password:</strong> {{password}}</p>
+                 
                 </div>
 
                 <p style="text-align:center;font-size:13px;color:#888;margin-top:40px;">© {{year}} ThunderGits. All rights reserved.</p>
@@ -72,53 +77,113 @@ const template=`<!DOCTYPE html>
   </body>
 </html>
 `
-// Create a new hospital
+
 exports.createHospital = async (req, res) => {
+  const session = await hospitalModel.startSession();
+
   try {
-   
+    session.startTransaction();
 
-    // first create hospital 
-    const hospital = new hospitalModel(req.body);
-    await hospital.save();
+    // 1. Create hospital
+    const [hospital] = await hospitalModel.create([req.body], { session });
 
-     // create user for hospital
-     const randomPass="adminBhai"
-     const user=await User.create({
-       email:req.body.adminEmail,
-       username:req.body.name,
-       role:'admin',
-       password:randomPass,
-       hospital:hospital._id,
-     })
-    //  notification setting create 
+    if (!hospital) {
+      await session.abortTransaction();
+      return sendResponse(res, { status: 400, message: 'Hospital is not created' });
+    }
 
-    await notificationSettingModel.create({
-      hospital: hospital._id,
-      emailNotifications: false,
-      inAppNotifications: true,
+    // 2. Create user
+    const randomPass = 'adminBhai';
+    const [user] = await User.create(
+      [{
+        email: req.body.adminEmail,
+        username: req.body.name,
+        role: 'admin',
+        password: randomPass,
+        hospital: hospital._id,
+      }],
+      { session }
+    );
+
+    // 3. Create notification setting
+    await notificationSettingModel.create(
+      [{
+        hospital: hospital._id,
+        emailNotifications: false,
+        inAppNotifications: true,
+      }],
+      { session }
+    );
+
+    // 4. Create subscription
+    const subscriptionToken = generateSubscriptionToken(hospital._id);
+    const defaultPlan=await offerPlanModel.findOne({name:'free_trial'});
+    
+    console.log(defaultPlan)
+    if (!defaultPlan) {
+      await session.abortTransaction();
+      return sendResponse(res, { status: 400, message: 'Default plan not found' });
+    }
+
+    // Fix date calculation
+const startDate = new Date();
+const endDate = new Date(startDate);
+endDate.setDate(endDate.getDate() + defaultPlan.validityInDays);
+    await Subscription.create(
+      [{
+        hospital: hospital._id,
+        offerPlanId: defaultPlan._id,
+        plan: defaultPlan.name,
+        price: defaultPlan.price,
+        startDate: new Date(),
+        endDate: endDate,
+        isActive: true,
+        isCancelled: false,
+        paymentMethod: 'wallet',
+        transactionId: 'xxxxxxxxxxxxxx',
+      }],
+      { session }
+    );
+
+    // 5. Send email
+    const html = template
+      .replace('{{hospitalName}}', hospital.name)
+      .replace('{{ownerName}}', hospital.ownerName)
+      .replace('{{registrationNumber}}', hospital.registrationNumber)
+      .replace('{{yearEstablished}}', hospital.yearEstablished || 'N/A')
+      .replace('{{licenseNumber}}', hospital.licenseNumber || 'N/A')
+      .replace('{{accreditations}}', hospital.accreditation.join(', '))
+      .replace('{{email}}', user.email)
+      .replace('{{password}}', randomPass)
+      .replace('{{year}}', new Date().getFullYear())
+      .replace('{{address}}', `${hospital.address.street}, ${hospital.address.city}, ${hospital.address.state} - ${hospital.address.zipCode}, ${hospital.address.country}`);
+
+    await sendEmail(user.email, 'Hospital Registration Certificate', html);
+
+    // 6. Commit and end session
+    await session.commitTransaction();
+    session.endSession();
+
+    return sendResponse(res, {
+      data: hospital,
+      status: 201,
+      message: 'Hospital created successfully',
     });
 
-    // send an email to organization with full in
-    console.log(hospital)
-    const html = template
-  .replace('{{hospitalName}}', hospital.name)
-  .replace('{{ownerName}}', hospital.ownerName)
-  .replace('{{registrationNumber}}', hospital.registrationNumber)
-  .replace('{{yearEstablished}}', hospital.yearEstablished || 'N/A')
-  .replace('{{licenseNumber}}', hospital.licenseNumber || 'N/A')
-  .replace('{{accreditations}}', hospital.accreditation.join(', '))
-  .replace('{{email}}', user.email)
-  .replace('{{password}}', randomPass)
-  .replace('{{year}}', new Date().getFullYear())
-  .replace('{{address}}', `${hospital.address.street}, ${hospital.address.city}, ${hospital.address.state} - ${hospital.address.zipCode}, ${hospital.address.country}`);
-
-  await sendEmail(user.email, "Hospital Registration Certificate", html);
-  sendResponse(res, { data: hospital, status: 201, message: 'Hospital created successfully' });
-
   } catch (err) {
-    sendResponse(res, { error: true, status: 400, message: 'Error creating hospital', data: err.message });
+    await session.abortTransaction();
+    session.endSession();
+    console.error('Hospital creation error:', err);
+
+    return sendResponse(res, {
+      error: true,
+      status: 400,
+      message: 'Error creating hospital',
+      data: err,
+    });
   }
 };
+
 
 // Get all hospitals
 exports.getAllHospitals = async (req, res) => {
