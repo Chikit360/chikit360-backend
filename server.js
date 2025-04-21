@@ -22,6 +22,7 @@ const notificationSettingdRouter = require('./routes/notificationSettingRouter')
 const subscriptionRouter = require('./routes/subscriptionRouter');
 const superAdminRouter = require('./routes/superAdminDashboardRouter');
 const offerPlanRouter = require('./routes/offerPlanRouter');
+const inquiryRouter = require('./routes/inquiryRouter');
 const paymentRouter = require('./routes/paymentRouter');
 const authMiddleware = require('./middlewares/authMiddleware');
 const errorMiddleware = require('./middlewares/errorMiddleware');
@@ -117,6 +118,7 @@ app.use('/dashboard',authMiddleware.verifyToken, dashboardRouter);
 // super admin
 app.use('/super-admin',authMiddleware.verifyToken, superAdminRouter);
 app.use('/hospitals',authMiddleware.verifyToken, hospitalRouter);
+app.use('/inquiries', inquiryRouter);
 
 app.use('/payment', authMiddleware.verifyToken,paymentRouter);
 
