@@ -1,19 +1,5 @@
 const mongoose = require('mongoose');
 
-// export interface ISubscription extends Document {
-//   hospital: mongoose.Schema.Types.ObjectId;
-//   plan: 'basic' | 'standard' | 'premium';
-//   price: number;
-//   startDate: Date;
-//   endDate: Date;
-//   isActive: boolean;
-//   isCancelled: boolean;
-//   paymentMethod: 'card' | 'upi' | 'netbanking' | 'wallet';
-//   transactionId?: string;
-//   createdAt: Date;
-//   updatedAt: Date;
-// }
-
 const SubscriptionSchema = new mongoose.Schema(
   {
     hospital: {
@@ -26,7 +12,7 @@ const SubscriptionSchema = new mongoose.Schema(
       ref: 'OfferPlan',
       required: true,
     },
-    plan:{
+    plan: {
       type: String,
       required: true,
     },
@@ -54,6 +40,12 @@ const SubscriptionSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    extraAddOn:[
+      {
+        title:String,
+        price:Number,
+      }
+    ],
     razorpayOrderId: {
       type: String,
       default: null,
@@ -72,6 +64,25 @@ const SubscriptionSchema = new mongoose.Schema(
   }
 );
 
+// 🔍 Static method to fetch and validate expiry
+SubscriptionSchema.statics.findWithExpiryCheck = async function (filter = {}) {
+  // Fetch one subscription
+  const subscription = await this.findOne(filter);
+
+  if (!subscription) return null;
+
+  const now = new Date();
+
+  // Check and update if expired
+  if (subscription.endDate < now && subscription.isActive) {
+    subscription.isActive = false;
+    await subscription.save();
+  }
+
+  return subscription;
+};
+
+
 const Subscription = mongoose.model('Subscription', SubscriptionSchema);
 
-module.exports= Subscription;
+module.exports = Subscription;

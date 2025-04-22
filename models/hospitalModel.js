@@ -81,6 +81,10 @@ const HospitalSchema = new mongoose.Schema({
     licenses: [{ type: String }],
     insurance: [{ type: String }],
   },
+  initialSetUpPaid:{
+    type:Boolean,
+    default:false
+  },
 
   insuranceDetails: [
     {

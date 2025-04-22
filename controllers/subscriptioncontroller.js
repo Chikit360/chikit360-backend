@@ -5,14 +5,36 @@ const sendResponse = require("../utils/response.formatter");
 // Get curr subscriptions
 exports.getCurrSubscriptions = async (req, res) => {
   try {
-    console.log("subscription: ",req.user.hospital)
-    const {hospitalId}=req.query;
-    const subscriptions = await Subscription.findOne({hospital:hospitalId}).populate('hospital offerPlanId');
-    sendResponse(res, { data: subscriptions, status: 200, message: 'Fetched curr subscriptions' });
+    const hospitalId = req.query.hospitalId || req.user?.hospital;
+
+    if (!hospitalId) {
+      return sendResponse(res, {
+        status: 400,
+        message: 'Hospital ID is required',
+        error: true,
+      });
+    }
+
+    const subscriptions = await Subscription.findWithExpiryCheck({ hospital: hospitalId });
+const populatedSubscriptions = await Subscription.populate(subscriptions, { path: 'hospital offerPlanId' });
+
+
+    sendResponse(res, {
+      data: populatedSubscriptions,
+      status: 200,
+      message: 'Fetched current subscriptions',
+    });
   } catch (error) {
-    sendResponse(res, { status: 500, message: 'Failed to fetch subscriptions', data: error.message, error: true });
+    console.error("Error fetching current subscriptions:", error);
+    sendResponse(res, {
+      status: 500,
+      message: 'Failed to fetch subscriptions',
+      data: process.env.NODE_ENV === 'production' ? null : error.message,
+      error: true,
+    });
   }
 };
+
 // Get all subscriptions
 exports.getAllSubscriptions = async (req, res) => {
   try {

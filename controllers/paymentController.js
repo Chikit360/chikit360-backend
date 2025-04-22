@@ -3,6 +3,7 @@ const crypto = require("crypto"); // adjust path as needed
 const sendResponse = require("../utils/response.formatter");
 const Subscription = require("../models/subscriptionModel");
 const offerPlanModel = require("../models/offerPlanModel");
+const hospitalModel = require("../models/hospitalModel");
 
 // Create Razorpay order
 const createOrder = async (req, res) => {
@@ -11,6 +12,10 @@ const createOrder = async (req, res) => {
       key_id: process.env.RAZORPAY_KEY_ID,
       key_secret: process.env.RAZORPAY_SECRET,
     });
+
+    const extraAddOn=req.body.extraAddOn ?? []
+    const subscriptionMonthByUser=req.body.subscriptionMonthByUser
+    console.log(extraAddOn)
 
     const planDetail=await offerPlanModel.findById(req.query.offerId); // here we will fetch the subscription plan data not subscription of hospital
     if (!planDetail) {
@@ -21,8 +26,17 @@ const createOrder = async (req, res) => {
       });
     }
 
+    const addOnprice = extraAddOn.reduce((total, record) => {
+      return total + record.price;
+    }, 0);
+    
+
+    const hospitalDetail=await hospitalModel.findById(req.user.hospital);
+
+    // initial set-up once paid then user will not paid on re-new the subscription
+    const finalAmount=addOnprice+(planDetail.price * Number(subscriptionMonthByUser))+ (hospitalDetail.initialSetUpPaid===false ?planDetail.initialSetUpPrice:0 );
     const options = {
-      amount: planDetail.price * 100, // convert to paise
+      amount: finalAmount * 100, // convert to paise
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
     };
@@ -49,6 +63,7 @@ const createOrder = async (req, res) => {
     }
 
     subscription.razorpayOrderId = order.id;
+    subscription.extraAddOn=extraAddOn;
     await subscription.save()
 
     sendResponse(res, {
@@ -72,6 +87,8 @@ const verifyPayment = async (req, res) => {
     const {
       razorpay_order_id,
       razorpay_payment_id,
+      subscription_plan_id,
+      subscriptionMonthByUser,
       razorpay_signature,
     } = req.body;
     
@@ -102,10 +119,29 @@ const verifyPayment = async (req, res) => {
       });
     }
 
-    subscription.transactionId = razorpay_payment_id;
+    const planDetail=await offerPlanModel.findById(subscription_plan_id)
+
+    // subscription.hospital= hospital._id;
+    const startDate = new Date();
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + (Number(subscriptionMonthByUser) * 28));
+    
+    subscription.offerPlanId = planDetail._id;
+    subscription.plan = planDetail.name;
+    subscription.price = planDetail.price;
+    subscription.startDate = startDate;
+    subscription.endDate = endDate;
     subscription.isActive = true;
     subscription.isCancelled = false;
-    await subscription.save()
+    subscription.paymentMethod = 'wallet';
+    subscription.transactionId = razorpay_payment_id;
+    await subscription.save();
+    
+    const hospitalDetail=await hospitalModel.findById(req.user.hospital);
+    if(hospitalDetail.initialSetUpPaid===false){
+      hospitalDetail.initialSetUpPaid=true;
+      await hospitalDetail.save()
+    }
     // TODO: Save payment info to DB if needed
 
     sendResponse(res, {

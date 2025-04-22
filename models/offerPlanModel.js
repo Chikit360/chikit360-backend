@@ -31,7 +31,13 @@ const planSchema = new mongoose.Schema(
       type: String,
     },
     features: [featureSchema], // All the features enabled/disabled in this plan
-
+    initialSetUpPrice: Number,
+    extraAddOn:[
+      {
+        title:String,
+        price:Number,
+      }
+    ],
     limits: {
       userLimit: { type: Number, default: 1 },
       departmentLimit: { type: Number, default: 1 },
