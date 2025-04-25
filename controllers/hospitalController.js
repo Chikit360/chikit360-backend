@@ -9,7 +9,7 @@ const mongoose = require('mongoose');
 const offerPlanModel = require('../models/offerPlanModel');
 
 
-const template=`<!DOCTYPE html>
+const template = `<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -117,24 +117,24 @@ exports.createHospital = async (req, res) => {
 
     // 4. Create subscription
     const subscriptionToken = generateSubscriptionToken(hospital._id);
-    const defaultPlan=await offerPlanModel.findOne({name:'free_trial'});
-    
+    const defaultPlan = await offerPlanModel.findOne({ name: 'free_trial' });
+
     console.log(defaultPlan)
     if (!defaultPlan) {
       await session.abortTransaction();
       return sendResponse(res, { status: 400, message: 'Default plan not found' });
     }
-
+    console.log(defaultPlan)
     // Fix date calculation
-const startDate = new Date();
-const endDate = new Date(startDate);
-endDate.setDate(endDate.getDate() + defaultPlan.validityInDays);
+    const startDate = new Date();
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + (defaultPlan.scheme[0]?.validityInDays ?? 7));
     await Subscription.create(
       [{
         hospital: hospital._id,
         offerPlanId: defaultPlan._id,
-        plan: defaultPlan.name,
-        price: defaultPlan.price,
+        plan: defaultPlan.name ?? "free_trial",
+        price: defaultPlan.scheme[0]?.price ?? 0,
         startDate: new Date(),
         endDate: endDate,
         isActive: true,
@@ -178,7 +178,7 @@ endDate.setDate(endDate.getDate() + defaultPlan.validityInDays);
     return sendResponse(res, {
       error: true,
       status: 400,
-      message: 'Error creating hospital',
+      message: err?.errorResponse?.errmsg || 'Error creating hospital',
       data: err,
     });
   }

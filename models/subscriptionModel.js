@@ -20,6 +20,10 @@ const SubscriptionSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    discount:{
+      type:Number,
+      default:0
+    },
     startDate: {
       type: Date,
       required: true,

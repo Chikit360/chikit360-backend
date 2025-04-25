@@ -1,29 +1,27 @@
 const mongoose = require("mongoose");
 
 const featureSchema = new mongoose.Schema({
-  key: { type: String, required: true },          // e.g., 'billing', 'create_medicine'
-  label: { type: String, required: true },        // e.g., 'Billing', 'Create Medicine'
+  key: { type: String, required: false },          // e.g., 'billing', 'create_medicine'
+  label: { type: String, required: false },        // e.g., 'Billing', 'Create Medicine'
   description: { type: String },                  // Optional: to explain what this feature does
   isEnabled: { type: Boolean, default: false },   // True if this feature is accessible in this plan
 });
+const schemeSchema = new mongoose.Schema({
+
+  price: { type: Number, required: true },        // e.g., 'Billing', 'Create Medicine'
+  discount: { type: Number ,required: false},                  // Optional: to explain what this feature does
+  validityInDays: { type: Number, required: true},   // True if this feature is accessible in this plan
+});
+
 
 const planSchema = new mongoose.Schema(
   {
     name: {
       type: String,
       required: true,
-      enum: ["free_trial", "basic", "standard", "premium"],
       unique: true,
     },
-    price: {
-      type: Number,
-      required: true,
-      default: 0, // Free trial = 0
-    },
-    validityInDays: {
-      type: Number,
-      required: true,
-    },
+    scheme: [schemeSchema],
     description: {
       type: String,
     },

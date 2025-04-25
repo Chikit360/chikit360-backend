@@ -189,6 +189,7 @@ userController.logout = async (req, res) => {
 
 userController.createUser = async (req, res) => {
   try {
+    console.log("here huhuhiu")
     const generateUsername=req.body.email.split("@")[0] ;
     const userData={...req.body,hospital:req.user.hospital,username:generateUsername}
     const user=await User.create(userData);
@@ -211,7 +212,7 @@ userController.createUser = async (req, res) => {
     console.error('user create error:', error);
     return sendResponse(res, {
       status: 500,
-      message: 'An error occurred while logging out',
+      message: 'An error occurred while creating user'+String(error),
       error: true
     });
   }
