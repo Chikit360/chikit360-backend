@@ -125,7 +125,7 @@ app.use('/payment', authMiddleware.verifyToken,paymentRouter);
 
 // open api 
 app.use('/offers-plan',offerPlanRouter);
-app.use('/bulk-upload', bulkUploadRouter);
+app.use('/bulk-upload',authMiddleware.verifyToken, bulkUploadRouter);
 
 // Error handling middleware
 app.use(errorMiddleware);

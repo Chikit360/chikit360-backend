@@ -35,6 +35,7 @@ const createOrder = async (req, res) => {
 
     // initial set-up once paid then user will not paid on re-new the subscription
     const finalAmount=addOnprice+(planDetail.price * Number(subscriptionMonthByUser))+ (hospitalDetail.initialSetUpPaid===false ?planDetail.initialSetUpPrice:0 );
+    console.log(finalAmount)
     const options = {
       amount: finalAmount * 100, // convert to paise
       currency: "INR",
@@ -72,6 +73,7 @@ const createOrder = async (req, res) => {
       message: "Order created successfully",
     });
   } catch (error) {
+    console.log(error)
     sendResponse(res, {
       status: 500,
       error: true,
