@@ -8,7 +8,6 @@ const DropdownOptionSchema = new mongoose.Schema(
       ref: "Hospital"
     },
     label: { type: String, required: true, unique: true },
-    value: { type: String, required: true, unique: true },
     inputFieldName: { type: String, required: true },
     status: { type: String, enum: ["active", "inactive"], default: "active" },
   },

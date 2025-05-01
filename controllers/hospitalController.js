@@ -89,7 +89,7 @@ exports.createHospital = async (req, res) => {
 
     if (!hospital) {
       await session.abortTransaction();
-      return sendResponse(res, { status: 400, message: 'Hospital is not created' });
+      return sendResponse(res, { status: 400, message: 'Pharmacy is not created' });
     }
 
     // 2. Create user
@@ -158,7 +158,7 @@ endDate.setDate(endDate.getDate() + defaultPlan.validityInDays);
       .replace('{{year}}', new Date().getFullYear())
       .replace('{{address}}', `${hospital.address.street}, ${hospital.address.city}, ${hospital.address.state} - ${hospital.address.zipCode}, ${hospital.address.country}`);
 
-    await sendEmail(user.email, 'Hospital Registration Certificate', html);
+    await sendEmail(user.email, 'Pharmacy Registration Certificate', html);
 
     // 6. Commit and end session
     await session.commitTransaction();
@@ -167,18 +167,18 @@ endDate.setDate(endDate.getDate() + defaultPlan.validityInDays);
     return sendResponse(res, {
       data: hospital,
       status: 201,
-      message: 'Hospital created successfully',
+      message: 'Pharmacy created successfully',
     });
 
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
-    console.error('Hospital creation error:', err);
+    console.error('Pharmacy creation error:', err);
 
     return sendResponse(res, {
       error: true,
       status: 400,
-      message: 'Error creating hospital',
+      message: err?.errorResponse?.errmsg || 'Error creating Pharmacy',
       data: err,
     });
   }
@@ -189,9 +189,9 @@ endDate.setDate(endDate.getDate() + defaultPlan.validityInDays);
 exports.getAllHospitals = async (req, res) => {
   try {
     const hospitals = await hospitalModel.find().sort({ createdAt: -1 });
-    sendResponse(res, { data: hospitals, status: 200, message: 'Hospitals fetched successfully' });
+    sendResponse(res, { data: hospitals, status: 200, message: 'Pharmacy fetched successfully' });
   } catch (err) {
-    sendResponse(res, { error: true, status: 400, message: 'Error fetching hospitals', data: err.message });
+    sendResponse(res, { error: true, status: 400, message: 'Error fetching Pharmacy', data: err.message });
   }
 };
 
@@ -200,11 +200,11 @@ exports.getHospitalById = async (req, res) => {
   try {
     const hospital = await hospitalModel.findById(req.params.id);
     if (!hospital) {
-      return sendResponse(res, { error: true, status: 404, message: 'Hospital not found' });
+      return sendResponse(res, { error: true, status: 404, message: 'Pharmacy not found' });
     }
-    sendResponse(res, { data: hospital, status: 200, message: 'Hospital fetched successfully' });
+    sendResponse(res, { data: hospital, status: 200, message: 'Pharmacy fetched successfully' });
   } catch (err) {
-    sendResponse(res, { error: true, status: 400, message: 'Error fetching hospital', data: err.message });
+    sendResponse(res, { error: true, status: 400, message: 'Error fetching Pharmacy', data: err.message });
   }
 };
 
@@ -214,11 +214,11 @@ exports.updateHospital = async (req, res) => {
     console.log(req.body)
     const hospital = await hospitalModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!hospital) {
-      return sendResponse(res, { error: true, status: 404, message: 'Hospital not found' });
+      return sendResponse(res, { error: true, status: 404, message: 'Pharmacy not found' });
     }
-    sendResponse(res, { data: hospital, status: 200, message: 'Hospital updated successfully' });
+    sendResponse(res, { data: hospital, status: 200, message: 'Pharmacy updated successfully' });
   } catch (err) {
-    sendResponse(res, { error: true, status: 400, message: 'Error updating hospital', data: err.message });
+    sendResponse(res, { error: true, status: 400, message: 'Error updating Pharmacy', data: err.message });
   }
 };
 
@@ -227,10 +227,10 @@ exports.deleteHospital = async (req, res) => {
   try {
     const hospital = await hospitalModel.findByIdAndDelete(req.params.id);
     if (!hospital) {
-      return sendResponse(res, { error: true, status: 404, message: 'Hospital not found' });
+      return sendResponse(res, { error: true, status: 404, message: 'Pharmacy not found' });
     }
-    sendResponse(res, { status: 200, message: 'Hospital deleted successfully' });
+    sendResponse(res, { status: 200, message: 'Pharmacy deleted successfully' });
   } catch (err) {
-    sendResponse(res, { error: true, status: 400, message: 'Error deleting hospital', data: err.message });
+    sendResponse(res, { error: true, status: 400, message: 'Error deleting Pharmacy', data: err.message });
   }
 };
