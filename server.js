@@ -24,6 +24,7 @@ const superAdminRouter = require('./routes/superAdminDashboardRouter');
 const offerPlanRouter = require('./routes/offerPlanRouter');
 const inquiryRouter = require('./routes/inquiryRouter');
 const paymentRouter = require('./routes/paymentRouter');
+const bulkUploadRouter = require('./routes/bulkUploadRouter');
 const authMiddleware = require('./middlewares/authMiddleware');
 const errorMiddleware = require('./middlewares/errorMiddleware');
 const { runLowStockCheck, runExpiryCheck } = require('./services/inventoryService');
@@ -124,6 +125,7 @@ app.use('/payment', authMiddleware.verifyToken,paymentRouter);
 
 // open api 
 app.use('/offers-plan',offerPlanRouter);
+app.use('/bulk-upload', bulkUploadRouter);
 
 // Error handling middleware
 app.use(errorMiddleware);
