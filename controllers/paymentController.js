@@ -14,7 +14,7 @@ const createOrder = async (req, res) => {
     });
 
     const extraAddOn=req.body.extraAddOn ?? []
-    const subscriptionMonthByUser=req.body.subscriptionMonthByUser
+    const schemeData=req.body.schemeData
     console.log(extraAddOn)
 
     const planDetail=await offerPlanModel.findById(req.query.offerId); // here we will fetch the subscription plan data not subscription of hospital
@@ -32,10 +32,20 @@ const createOrder = async (req, res) => {
     
 
     const hospitalDetail=await hospitalModel.findById(req.user.hospital);
+    const subscription = await Subscription.findOne({
+      hospital: req.user.hospital,
+    });
+
+    if(subscription.name!=="free_trial"  && subscription.isActive){
+      return sendResponse(res, {
+        status: 400,
+        error: true,
+        message: "You have already active subscription",
+      });
+    }
 
     // initial set-up once paid then user will not paid on re-new the subscription
-    const finalAmount=addOnprice+(planDetail.price * Number(subscriptionMonthByUser))+ (hospitalDetail.initialSetUpPaid===false ?planDetail.initialSetUpPrice:0 );
-    console.log(finalAmount)
+    const finalAmount=addOnprice+ (schemeData.price- (schemeData.price * schemeData.discount * 0.01)) + (hospitalDetail.initialSetUpPaid===false ?planDetail.initialSetUpPrice:0 );
     const options = {
       amount: finalAmount * 100, // convert to paise
       currency: "INR",
@@ -51,9 +61,7 @@ const createOrder = async (req, res) => {
         message: "Failed to create Razorpay order",
       });
     }
-    const subscription = await Subscription.findOne({
-      hospital: req.user.hospital,
-    });
+  
 
     if (!subscription) {
       return sendResponse(res, {
@@ -90,7 +98,7 @@ const verifyPayment = async (req, res) => {
       razorpay_order_id,
       razorpay_payment_id,
       subscription_plan_id,
-      subscriptionMonthByUser,
+      schemeData,
       razorpay_signature,
     } = req.body;
     
@@ -126,11 +134,12 @@ const verifyPayment = async (req, res) => {
     // subscription.hospital= hospital._id;
     const startDate = new Date();
     const endDate = new Date(startDate);
-    endDate.setDate(endDate.getDate() + (Number(subscriptionMonthByUser) * 28));
+    endDate.setDate(endDate.getDate() + (Number(schemeData.validityInDays)));
     
     subscription.offerPlanId = planDetail._id;
     subscription.plan = planDetail.name;
-    subscription.price = planDetail.price;
+    subscription.price = schemeData.price;
+    subscription.discount = schemeData.discount;
     subscription.startDate = startDate;
     subscription.endDate = endDate;
     subscription.isActive = true;
