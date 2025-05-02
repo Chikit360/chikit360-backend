@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const sendResponse = require('../utils/response.formatter');
 const tokenModel = require('../models/tokenModel');
 const createAndStoreToken = require('../utility/generateToken');
+const hospitalModel = require('../models/hospitalModel');
 
 const userController = {};
 
@@ -36,9 +37,12 @@ console.log("login")
     // Generate JWT token
     console.log("first")
     const token = await createAndStoreToken(user._id,"access");
-
+    let hospitalDetail;
+    if(user.hospital){
+      hospitalDetail=await hospitalModel.findById(user.hospital);
+    }
     return sendResponse(res, {
-      data: { ...user.toObject(), token },
+      data: { ...user.toObject(),hospitalDetail:{name:hospitalDetail.name,address:hospitalDetail.address}, token },
       status: 200,
       message: 'Login successful',
     });
@@ -65,8 +69,12 @@ userController.getCurrentUser = async (req, res) => {
         error: true
       });
     }
+    let hospitalDetail;
+    if(user.hospital){
+      hospitalDetail=await hospitalModel.findById(user.hospital);
+    }
     return sendResponse(res, {
-      data: user,
+      data: { ...user.toObject(),hospitalDetail:{name:hospitalDetail.name,address:hospitalDetail.address} },
       status: 200,
       message: 'User info retrieved successfully',
     });
