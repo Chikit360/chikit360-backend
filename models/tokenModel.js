@@ -42,8 +42,9 @@ const tokenSchema = new mongoose.Schema({
    */
   type: {
     type: String,
-    enum: ['access', 'refresh', 'email_verification', 'password_reset'],
-    required: true
+    enum: ['access','scanner', 'refresh', 'email_verification', 'password_reset'],
+    required: true,
+    default:'access'
   },
 
   /**

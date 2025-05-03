@@ -495,6 +495,7 @@ medicineController.getAvailableMedicines = async (req, res) => {
               $project: {
                   _id: 1,
                   name: 1,
+                  barcode:1,
                   totalStock: 1,
                   sellingPrice: 1,
                   purchasePrice: 1

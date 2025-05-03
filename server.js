@@ -38,6 +38,12 @@ app.use(helmet());
 // Enable CORS
 app.use(cors());
 
+// app.use(cors(
+//   {
+//     origin:["http://192.168.41.3:3000","http://localhost:3000"],
+//     credentials:true, 
+//   }
+// ));
 // Middleware for parsing JSON bodies
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));

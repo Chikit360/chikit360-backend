@@ -71,9 +71,29 @@ const createOrder = async (req, res) => {
       });
     }
 
-    subscription.razorpayOrderId = order.id;
-    subscription.extraAddOn=extraAddOn;
-    await subscription.save()
+    const startDate = new Date();
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + (scheme?.validityInDays ?? 7));
+
+    const newSubscription=new Subscription({
+      hospital: hospitalDetail._id,
+      offerPlanId: planDetail._id,
+      plan: planDetail.name ?? "free_trial",
+      price: schemeData?.price ?? 0,
+      startDate: new Date(),
+      endDate: endDate,
+      isActive: false,
+      isCancelled: false,
+      paymentMethod: 'wallet',
+      transactionId: 'xxxxxxxxxxxxxx',
+      razorpayOrderId : order.id,
+      extraAddOn:extraAddOn
+    })
+
+    await newSubscription.save()
+    // subscription.razorpayOrderId = order.id;
+    // subscription.extraAddOn=extraAddOn;
+    // await subscription.save()
 
     sendResponse(res, {
       data: order,
@@ -119,6 +139,8 @@ const verifyPayment = async (req, res) => {
 
     const subscription = await Subscription.findOne({
       hospital: req.user.hospital,
+      razorpayOrderId:razorpay_order_id,
+      isActive:false
     });
 
     if (!subscription) {
@@ -128,23 +150,12 @@ const verifyPayment = async (req, res) => {
         message: "Subscription not found",
       });
     }
-
-    const planDetail=await offerPlanModel.findById(subscription_plan_id)
-
-    // subscription.hospital= hospital._id;
-    const startDate = new Date();
-    const endDate = new Date(startDate);
-    endDate.setDate(endDate.getDate() + (Number(schemeData.validityInDays)));
+   
     
-    subscription.offerPlanId = planDetail._id;
-    subscription.plan = planDetail.name;
-    subscription.price = schemeData.price;
     subscription.discount = schemeData.discount;
-    subscription.startDate = startDate;
-    subscription.endDate = endDate;
+   
     subscription.isActive = true;
-    subscription.isCancelled = false;
-    subscription.paymentMethod = 'wallet';
+    
     subscription.transactionId = razorpay_payment_id;
     await subscription.save();
     

@@ -9,10 +9,11 @@ router.get('/', checkActiveSubscription,subscriptionController.getAllSubscriptio
 
 router.get('/curr', subscriptionController.getCurrSubscriptions);
 
-// Get subscription by hospital ID
-router.get('/:hospitalId',checkActiveSubscription, subscriptionController.getSubscriptionByHospital);
-
 // Cancel subscription by ID
 router.put('/cancel/:id',checkActiveSubscription, subscriptionController.cancelSubscription);
+
+// Get subscription by hospital ID
+router.get('/:hospitalId', subscriptionController.getSubscriptionByHospital);
+
 
 module.exports = router;

@@ -35,14 +35,13 @@ console.log("login")
     }
 
     // Generate JWT token
-    console.log("first")
-    const token = await createAndStoreToken(user._id,"access");
+    const token =req.headers["scanner"]!=="true"? await createAndStoreToken(user._id,"access"):null;
     let hospitalDetail;
     if(user.hospital){
       hospitalDetail=await hospitalModel.findById(user.hospital);
     }
     return sendResponse(res, {
-      data: { ...user.toObject(),hospitalDetail:{name:hospitalDetail.name,address:hospitalDetail.address}, token },
+      data: { ...user.toObject(),hospitalDetail:hospitalDetail && {_id:hospitalDetail._id,name:hospitalDetail.name,address:hospitalDetail.address}, token },
       status: 200,
       message: 'Login successful',
     });
@@ -74,7 +73,7 @@ userController.getCurrentUser = async (req, res) => {
       hospitalDetail=await hospitalModel.findById(user.hospital);
     }
     return sendResponse(res, {
-      data: { ...user.toObject(),hospitalDetail:{name:hospitalDetail.name,address:hospitalDetail.address} },
+      data: { ...user.toObject(),hospitalDetail:hospitalDetail && {_id:hospitalDetail._id,name:hospitalDetail.name,address:hospitalDetail.address} },
       status: 200,
       message: 'User info retrieved successfully',
     });

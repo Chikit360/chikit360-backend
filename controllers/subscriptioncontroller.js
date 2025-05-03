@@ -15,7 +15,7 @@ exports.getCurrSubscriptions = async (req, res) => {
       });
     }
 
-    const subscriptions = await Subscription.findWithExpiryCheck({ hospital: hospitalId });
+    const subscriptions = await Subscription.findWithExpiryCheck({ hospital: hospitalId,isActive:true });
 const populatedSubscriptions = await Subscription.populate(subscriptions, { path: 'hospital offerPlanId' });
 
 
@@ -49,7 +49,7 @@ exports.getAllSubscriptions = async (req, res) => {
 exports.getSubscriptionByHospital = async (req, res) => {
   try {
     const { hospitalId } = req.params;
-    const subscription = await Subscription.findOne({ hospital: hospitalId });
+    const subscription = await Subscription.find({ hospital: hospitalId }).sort({createdAt:-1});
 
     if (!subscription) {
       return sendResponse(res, { status: 404, message: 'Subscription not found', error: true });

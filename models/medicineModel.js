@@ -11,6 +11,12 @@ const medicineSchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     ref: "Hospital"
   },
+  barcode:{
+    type: String,
+    required: true,
+    trim: true,
+    unique:true
+  },
   
   /**
    * Unique of the medicine.
