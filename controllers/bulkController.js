@@ -33,18 +33,18 @@ exports.bulkUploadMedicineInventory = async (req, res) => {
 
         // Prepare medicine data
         const medicineData = {
-          hospital:req.user.hospital,
+          hospital: req.user.hospital,
           name: item["ITEM NAME"],
           genericName: item["GENERIC NAME"],
           form: item["FORM"],
           strength: item["STRENGTH"],
           unit: item["UNIT"],
-          prescriptionRequired: item["PRESCRIPTION"]==='yes'?true:false,
+          prescriptionRequired: item["PRESCRIPTION"] === 'yes' ? true : false,
           medicineCode: `MED${Math.floor(10000 + Math.random() * 90000)}`,
         };
 
         // Find or create medicine
-        let medicine = await Medicine.findOne({ name: medicineData.name,hospital:req.user.hospital }).session(session);
+        let medicine = await Medicine.findOne({ name: medicineData.name, hospital: req.user.hospital }).session(session);
         if (!medicine) {
           try {
             const created = await Medicine.create([medicineData], { session });
@@ -109,8 +109,8 @@ exports.bulkUploadMedicineInventory = async (req, res) => {
           try {
             await Inventory.create([inventoryData], { session });
             item["Status"] = "Created new inventory";
-          } catch {
-            item["Status"] = "Failed: Inventory creation error";
+          } catch (err) {
+            item["Status"] = `Failed: Inventory creation error -> ${err}`;
           }
         }
       } catch (rowError) {

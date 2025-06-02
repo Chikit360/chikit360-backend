@@ -178,7 +178,6 @@ exports.createHospital = async (req, res) => {
     return sendResponse(res, {
       error: true,
       status: 400,
-      message: err?.errorResponse?.errmsg || 'Error creating Pharmacy',
       data: err,
     });
   }

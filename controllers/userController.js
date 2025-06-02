@@ -10,7 +10,7 @@ const userController = {};
 // User login
 userController.login = async (req, res) => {
   const { username, password } = req.body;
-console.log("login")
+  console.log("login")
   try {
     // Check if the user exists
     const user = await User.findOne({ username });
@@ -35,13 +35,13 @@ console.log("login")
     }
 
     // Generate JWT token
-    const token =req.headers["scanner"]!=="true"? await createAndStoreToken(user._id,"access"):null;
+    const token = req.headers["scanner"] !== "true" ? await createAndStoreToken(user._id, "access") : null;
     let hospitalDetail;
-    if(user.hospital){
-      hospitalDetail=await hospitalModel.findById(user.hospital);
+    if (user.hospital) {
+      hospitalDetail = await hospitalModel.findById(user.hospital);
     }
     return sendResponse(res, {
-      data: { ...user.toObject(),hospitalDetail:hospitalDetail && {_id:hospitalDetail._id,name:hospitalDetail.name,address:hospitalDetail.address}, token },
+      data: { ...user.toObject(), hospitalDetail: hospitalDetail && { _id: hospitalDetail._id, name: hospitalDetail.name, address: hospitalDetail.address }, token },
       status: 200,
       message: 'Login successful',
     });
@@ -69,11 +69,11 @@ userController.getCurrentUser = async (req, res) => {
       });
     }
     let hospitalDetail;
-    if(user.hospital){
-      hospitalDetail=await hospitalModel.findById(user.hospital);
+    if (user.hospital) {
+      hospitalDetail = await hospitalModel.findById(user.hospital);
     }
     return sendResponse(res, {
-      data: { ...user.toObject(),hospitalDetail:hospitalDetail && {_id:hospitalDetail._id,name:hospitalDetail.name,address:hospitalDetail.address} },
+      data: { ...user.toObject(), hospitalDetail: hospitalDetail && { _id: hospitalDetail._id, name: hospitalDetail.name, address: hospitalDetail.address } },
       status: 200,
       message: 'User info retrieved successfully',
     });
@@ -197,9 +197,9 @@ userController.logout = async (req, res) => {
 userController.createUser = async (req, res) => {
   try {
     console.log("here huhuhiu")
-    const generateUsername=req.body.email.split("@")[0] ;
-    const userData={...req.body,hospital:req.user.hospital,username:generateUsername}
-    const user=await User.create(userData);
+    const generateUsername = req.body.email.split("@")[0];
+    const userData = { ...req.body, hospital: req.user.hospital, username: generateUsername }
+    const user = await User.create(userData);
     if (!user) {
       return sendResponse(res, {
         data: null,
@@ -219,7 +219,7 @@ userController.createUser = async (req, res) => {
     console.error('user create error:', error);
     return sendResponse(res, {
       status: 500,
-      message: 'An error occurred while creating user'+String(error),
+      message: 'An error occurred while creating user' + String(error),
       error: true
     });
   }
@@ -231,7 +231,7 @@ userController.allUsers = async (req, res) => {
       hospital: req.user.hospital,
       _id: { $ne: req.user._id }
     }).select('-password');
-    
+
 
     return sendResponse(res, {
       status: 200,
@@ -253,7 +253,7 @@ userController.getUserById = async (req, res) => {
   try {
     const userId = req.params.id;
 
-    const user = await User.findById (userId).select("-password");
+    const user = await User.findById(userId).select("-password");
 
     if (!user) {
       return sendResponse(res, {

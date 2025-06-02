@@ -7,17 +7,16 @@ const generateCustomId = require('../utils/generateSchemaID');
  */
 const medicineSchema = new mongoose.Schema({
 
-  hospital:{
+  hospital: {
     type: mongoose.Schema.ObjectId,
     ref: "Hospital"
   },
-  barcode:{
+  barcode: {
     type: String,
-    required: true,
     trim: true,
-    unique:true
+    unique: true
   },
-  
+
   /**
    * Unique of the medicine.
    * Required: Yes
@@ -141,7 +140,7 @@ const medicineSchema = new mongoose.Schema({
 });
 
 // Pre-save hook to generate a custom _id before saving
-medicineSchema.pre('save', function(next) {
+medicineSchema.pre('save', function (next) {
   if (this.isNew) {
     // Pass your prefix ('MED' or any other) to the generateCustomId function
     this._id = generateCustomId('MED'); // You can change the 'MED' to any other prefix as needed

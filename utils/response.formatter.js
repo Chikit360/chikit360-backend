@@ -8,6 +8,13 @@ const sendResponse = (
   const formattedError = isProduction && status >= 500 ? 'Internal Server Error' : message;
 
   // Standard Response
+  if (data && data.errorResponse) {
+    const code = data.errorResponse.code
+    if (code === 11000) {
+      const duplicateField = Object.keys(data.errorResponse.keyValue).join(',');
+      message = `Duplicate entry of ${duplicateField}`
+    }
+  }
   return res.status(status).json({
     success: status >= 200 && status < 300,
     status,
