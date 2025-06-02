@@ -36,14 +36,14 @@ const app = express();
 app.use(helmet());
 
 // Enable CORS
-app.use(cors());
+// app.use(cors());
 
-// app.use(cors(
-//   {
-//     origin:["http://192.168.41.3:3000","http://localhost:3000"],
-//     credentials:true, 
-//   }
-// ));
+app.use(cors(
+  {
+    origin: ["https://chikit360-frontend.thundergits.com", "http://localhost:3000"],
+    credentials: true,
+  }
+));
 // Middleware for parsing JSON bodies
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
@@ -102,36 +102,36 @@ mongoose.connect(MONGO_URI,)
   .catch(err => console.log('MongoDB connection error:', err));
 
 // Mount the user router on /users path
-app.use('/users',  userRouter);
+app.use('/users', userRouter);
 
 // Mount the medicine router on /medicines path
-app.use('/medicines', authMiddleware.verifyToken,checkActiveSubscription, medicineRouter);
+app.use('/medicines', authMiddleware.verifyToken, checkActiveSubscription, medicineRouter);
 
 
-app.use('/sales', authMiddleware.verifyToken,checkActiveSubscription, stockRouter);
+app.use('/sales', authMiddleware.verifyToken, checkActiveSubscription, stockRouter);
 
 // app.use('/inventories', authMiddleware.verifyToken, inventoryRouter);
-app.use('/inventories',authMiddleware.verifyToken,checkActiveSubscription, inventoryRouter);
-app.use('/customers',authMiddleware.verifyToken,checkActiveSubscription, customerRouter);
-app.use('/dropdowns',authMiddleware.verifyToken,checkActiveSubscription, dropDownRouter);
-app.use('/notifications',authMiddleware.verifyToken,checkActiveSubscription, notificationRouter);
-app.use('/notification-settings',authMiddleware.verifyToken, checkActiveSubscription,notificationSettingdRouter);
-app.use('/subscription',authMiddleware.verifyToken,subscriptionRouter);
+app.use('/inventories', authMiddleware.verifyToken, checkActiveSubscription, inventoryRouter);
+app.use('/customers', authMiddleware.verifyToken, checkActiveSubscription, customerRouter);
+app.use('/dropdowns', authMiddleware.verifyToken, checkActiveSubscription, dropDownRouter);
+app.use('/notifications', authMiddleware.verifyToken, checkActiveSubscription, notificationRouter);
+app.use('/notification-settings', authMiddleware.verifyToken, checkActiveSubscription, notificationSettingdRouter);
+app.use('/subscription', authMiddleware.verifyToken, subscriptionRouter);
 
 // admin
-app.use('/dashboard',authMiddleware.verifyToken, dashboardRouter);
+app.use('/dashboard', authMiddleware.verifyToken, dashboardRouter);
 
 
 // super admin
-app.use('/super-admin',authMiddleware.verifyToken, superAdminRouter);
-app.use('/hospitals',authMiddleware.verifyToken, hospitalRouter);
+app.use('/super-admin', authMiddleware.verifyToken, superAdminRouter);
+app.use('/hospitals', authMiddleware.verifyToken, hospitalRouter);
 app.use('/inquiries', inquiryRouter);
 
-app.use('/payment', authMiddleware.verifyToken,paymentRouter);
+app.use('/payment', authMiddleware.verifyToken, paymentRouter);
 
 // open api 
-app.use('/offers-plan',offerPlanRouter);
-app.use('/bulk-upload',authMiddleware.verifyToken, bulkUploadRouter);
+app.use('/offers-plan', offerPlanRouter);
+app.use('/bulk-upload', authMiddleware.verifyToken, bulkUploadRouter);
 
 // Error handling middleware
 app.use(errorMiddleware);
