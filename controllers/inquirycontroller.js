@@ -36,7 +36,7 @@ exports.updateInquiryStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
-    const resolver=req.user._id
+    const resolver = req.user._id
     const updateData = {
       status,
       resolver,

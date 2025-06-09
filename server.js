@@ -40,7 +40,7 @@ app.use(helmet());
 
 app.use(cors(
   {
-    origin: ["https://chikit360-frontend.thundergits.com", "http://localhost:3000"],
+    origin: ["https://chikit360-frontend.thundergits.com", "https://tg-panel.chikit360.thundergits.com", "https://chikit360.thundergits.com", "http://127.0.0.1:5500", "http://localhost:3000", "http://localhost:5173"],
     credentials: true,
   }
 ));
